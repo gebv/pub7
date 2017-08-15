@@ -1,0 +1,15 @@
+FROM golang:1.8
+
+RUN mkdir -p /go/src/app
+WORKDIR /go/src/app
+
+RUN go get -u gopkg.in/urfave/cli.v2
+RUN go get -u github.com/boltdb/bolt
+RUN go get -u github.com/labstack/echo
+RUN go get -u github.com/tidwall/buntdb
+RUN go get -u go.uber.org/zap
+RUN go get -u github.com/dgrijalva/jwt-go
+RUN go get -u gopkg.in/telegram-bot-api.v4
+RUN go get -u github.com/nats-io/go-nats
+RUN go get -u github.com/BurntSushi/toml
+RUN go get -u github.com/yuin/gopher-lua
