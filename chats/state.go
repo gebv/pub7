@@ -4,28 +4,26 @@ import (
 	"time"
 )
 
-type StateStore interface {
-	Find(chatID string) (*State, error)
-	Update(obj *State) error
+type Store interface {
+	Find(chatID string) (*Chat, error)
+	Update(obj *Chat) error
 }
 
-func NewState(chatID string) *State {
-	return &State{
+func NewChat(chatID string) *Chat {
+	return &Chat{
 		ChatID: chatID,
 		Props:  make(map[string]interface{}),
 	}
 }
 
-type State struct {
-	ChatID   string
-	ScriptID string
-	LastQID  string
-
-	Props map[string]interface{}
-
-	UpdatedAt time.Time
+type Chat struct {
+	ChatID         string
+	PreviousNodeID string
+	NextNodeID     string
+	Props          map[string]interface{}
+	UpdatedAt      time.Time
 }
 
-func (s State) Prop(name string) interface{} {
+func (s Chat) Prop(name string) interface{} {
 	return s.Props[name]
 }

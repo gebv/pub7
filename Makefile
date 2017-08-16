@@ -10,7 +10,12 @@ builddocker:
 	docker-compose up -d buildapp
 
 admin-run:
-	go run main.go -file scripts/ff_script.toml admin-run -path_views views/admin/*.tpl
+	go run main.go -file scripts/example.toml admin-run -path_views views/admin/*.tpl
 
 tgbot:
-	go run main.go -file scripts/ff_script.toml tgbot-run
+	go run main.go -file scripts/example.toml tgbot-run
+.PHONY: tgbot
+
+tgbot2:
+	go run main.go -file scripts/example.toml run
+.PHONY: tgbot2

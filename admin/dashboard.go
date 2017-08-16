@@ -23,11 +23,12 @@ func ListChatsHandler(ctx echo.Context) error {
 func listChats(
 	offset int,
 	limit int,
-) []chats.State {
+) []chats.Chat {
 	if limit <= 0 {
 		limit = 100
 	}
-	var tuples []chats.State
+	limit = 1000
+	var tuples []chats.Chat
 	err := TarantoolConnection.SelectTyped(
 		"ff_tgbot_statechats",
 		"primary",
@@ -42,10 +43,10 @@ func listChats(
 			"get list states of chat",
 			"err", err,
 		)
-		return []chats.State{}
+		return []chats.Chat{}
 	}
 	if len(tuples) == 0 {
-		return []chats.State{}
+		return []chats.Chat{}
 	}
 	return tuples
 }

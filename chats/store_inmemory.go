@@ -2,29 +2,31 @@ package chats
 
 import (
 	"time"
+
+	"github.com/gebv/ff_tgbot/errors"
 )
 
-var _ StateStore = (*InmemoryState)(nil)
+var _ Store = (*InmemoryChat)(nil)
 
-func NewInmemoryState() *InmemoryState {
-	return &InmemoryState{
-		List: make(map[string]State),
+func NewInmemory() *InmemoryChat {
+	return &InmemoryChat{
+		List: make(map[string]Chat),
 	}
 }
 
-type InmemoryState struct {
-	List map[string]State
+type InmemoryChat struct {
+	List map[string]Chat
 }
 
-func (s *InmemoryState) Find(chatID string) (*State, error) {
+func (s *InmemoryChat) Find(chatID string) (*Chat, error) {
 	obj, exists := s.List[chatID]
 	if !exists {
-		return nil, ErrNotFound
+		return nil, errors.ErrNotFound
 	}
 	return &obj, nil
 }
 
-func (s *InmemoryState) Update(obj *State) error {
+func (s *InmemoryChat) Update(obj *Chat) error {
 	obj.UpdatedAt = time.Now()
 	s.List[obj.ChatID] = *obj
 	return nil

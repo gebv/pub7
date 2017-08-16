@@ -14,7 +14,7 @@ box.cfg{
     -- wal_dir='xlog',
     -- snap_dir='snap',
 }
-local prefix = 'ff_tgbot_'
+local prefix = 'ff_'
 local log = require("log")
 
 log.info('Info %s', box.info.version)
@@ -23,7 +23,7 @@ log.info('Info %s', box.info.version)
 -- Users
 --------------------
 
-s = box.schema.create_space(prefix..'statechats', {
+s = box.schema.create_space(prefix..'chats', {
     if_not_exists=true,
     })
 s:create_index('primary', {

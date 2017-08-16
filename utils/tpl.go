@@ -1,11 +1,11 @@
-package chats
+package utils
 
 import (
 	"bytes"
 	"html/template"
 )
 
-func Format2String(tpl string, args map[string]interface{}) (res string) {
+func ExecuteTemplate(tpl string, args map[string]interface{}) string {
 	t := template.Must(template.New("t1").Parse(tpl))
 	var buf bytes.Buffer
 	t.Execute(&buf, args)

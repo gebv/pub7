@@ -3,25 +3,25 @@ package chats
 import "testing"
 import "github.com/stretchr/testify/assert"
 
-func TestInmemoryState_Update(t *testing.T) {
+func TestInmemoryChat_Update(t *testing.T) {
 	type args struct {
-		obj *State
+		obj *Chat
 	}
 	tests := []struct {
-		name      string
-		fields    *InmemoryState
-		args      args
-		wantErr   bool
-		wantState *State
+		name     string
+		fields   *InmemoryChat
+		args     args
+		wantErr  bool
+		wantChat *Chat
 	}{
 		{
 			"",
-			&InmemoryState{
-				List: map[string]State{
-					"1": State{
-						ChatID:   "1",
-						ScriptID: "start",
-						LastQID:  "q#1",
+			&InmemoryChat{
+				List: map[string]Chat{
+					"1": Chat{
+						ChatID:         "1",
+						PreviousNodeID: "start",
+						NextNodeID:     "q#1",
 						Props: map[string]interface{}{
 							"a": "b",
 							"c": "d",
@@ -30,10 +30,10 @@ func TestInmemoryState_Update(t *testing.T) {
 				},
 			},
 			args{
-				&State{
-					ChatID:   "1",
-					ScriptID: "start",
-					LastQID:  "q#2",
+				&Chat{
+					ChatID:         "1",
+					PreviousNodeID: "start",
+					NextNodeID:     "q#2",
 					Props: map[string]interface{}{
 						"a": "b",
 						"e": "f",
@@ -41,10 +41,10 @@ func TestInmemoryState_Update(t *testing.T) {
 				},
 			},
 			false,
-			&State{
-				ChatID:   "1",
-				ScriptID: "start",
-				LastQID:  "q#2",
+			&Chat{
+				ChatID:         "1",
+				PreviousNodeID: "start",
+				NextNodeID:     "q#2",
 				Props: map[string]interface{}{
 					"a": "b",
 					"e": "f",
@@ -54,14 +54,17 @@ func TestInmemoryState_Update(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &InmemoryState{
+			s := &InmemoryChat{
 				List: tt.fields.List,
 			}
 			if err := s.Update(tt.args.obj); (err != nil) != tt.wantErr {
-				t.Errorf("InmemoryState.Update() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("InmemoryChat.Update() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			got, _ := s.Find(tt.args.obj.ChatID)
-			assert.Equal(t, tt.wantState, got)
+			assert.Equal(t, tt.wantChat.ChatID, got.ChatID)
+			assert.Equal(t, tt.wantChat.PreviousNodeID, got.PreviousNodeID)
+			assert.Equal(t, tt.wantChat.NextNodeID, got.NextNodeID)
+			assert.Equal(t, tt.wantChat.Props, got.Props)
 		})
 	}
 }

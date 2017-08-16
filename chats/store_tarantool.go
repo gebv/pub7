@@ -6,25 +6,26 @@ import (
 
 	"gopkg.in/vmihailenco/msgpack.v2"
 
+	"github.com/gebv/ff_tgbot/errors"
 	"github.com/tarantool/go-tarantool"
 )
 
-var _ StateStore = (*TarantoolState)(nil)
+var _ Store = (*TarantoolChat)(nil)
 
-func NewTarantoolState(conn *tarantool.Connection) *TarantoolState {
-	return &TarantoolState{
+func NewTarantool(conn *tarantool.Connection) *TarantoolChat {
+	return &TarantoolChat{
 		Conn: conn,
 	}
 }
 
-type TarantoolState struct {
+type TarantoolChat struct {
 	Conn *tarantool.Connection
 }
 
-func (s *TarantoolState) Find(chatID string) (*State, error) {
-	var tuples []State
+func (s *TarantoolChat) Find(chatID string) (*Chat, error) {
+	var tuples []Chat
 	err := s.Conn.SelectTyped(
-		"ff_tgbot_statechats",
+		"ff_chats",
 		"primary",
 		0,
 		1,
@@ -38,15 +39,15 @@ func (s *TarantoolState) Find(chatID string) (*State, error) {
 		return nil, err
 	}
 	if len(tuples) == 0 {
-		return nil, ErrNotFound
+		return nil, errors.ErrNotFound
 	}
 	return &tuples[0], nil
 }
 
-func (s *TarantoolState) Update(obj *State) error {
+func (s *TarantoolChat) Update(obj *Chat) error {
 	obj.UpdatedAt = time.Now()
 	_, err := s.Conn.Replace(
-		"ff_tgbot_statechats",
+		"ff_chats",
 		obj,
 	)
 	if err != nil {
@@ -55,7 +56,7 @@ func (s *TarantoolState) Update(obj *State) error {
 	return nil
 }
 
-func (m *State) EncodeMsgpack(e *msgpack.Encoder) error {
+func (m *Chat) EncodeMsgpack(e *msgpack.Encoder) error {
 	if err := e.EncodeSliceLen(5); err != nil {
 		return err
 	}
@@ -63,10 +64,10 @@ func (m *State) EncodeMsgpack(e *msgpack.Encoder) error {
 	if err := e.EncodeString(m.ChatID); err != nil {
 		return err
 	}
-	if err := e.EncodeString(m.ScriptID); err != nil {
+	if err := e.EncodeString(m.PreviousNodeID); err != nil {
 		return err
 	}
-	if err := e.EncodeString(m.LastQID); err != nil {
+	if err := e.EncodeString(m.NextNodeID); err != nil {
 		return err
 	}
 	if err := e.Encode(m.Props); err != nil {
@@ -78,7 +79,7 @@ func (m *State) EncodeMsgpack(e *msgpack.Encoder) error {
 	return nil
 }
 
-func (m *State) DecodeMsgpack(d *msgpack.Decoder) error {
+func (m *Chat) DecodeMsgpack(d *msgpack.Decoder) error {
 	var err error
 	var l int
 	if l, err = d.DecodeSliceLen(); err != nil {
@@ -91,10 +92,10 @@ func (m *State) DecodeMsgpack(d *msgpack.Decoder) error {
 	if m.ChatID, err = d.DecodeString(); err != nil {
 		return err
 	}
-	if m.ScriptID, err = d.DecodeString(); err != nil {
+	if m.PreviousNodeID, err = d.DecodeString(); err != nil {
 		return err
 	}
-	if m.LastQID, err = d.DecodeString(); err != nil {
+	if m.NextNodeID, err = d.DecodeString(); err != nil {
 		return err
 	}
 	if err = d.Decode(&m.Props); err != nil {

@@ -1,0 +1,37 @@
+[[nodes]]
+id = "start"
+text = "Привет, я робот. Как тебя зовут?"
+next = "your_name"
+param = "name"
+
+[[nodes]]
+id = "your_name"
+text = "Ок, твое имя {{.name}}"
+transit = true
+next = "buttons"
+
+[[nodes]]
+id = "buttons"
+text = "{{.name}} выберите интересующий вас вариант"
+	[[nodes.opts]]
+	text = "Выход"
+	next = "forceexist"
+	[[nodes.opts]]
+	text = "Прочее 1"
+
+next = "transit1"
+
+
+[[nodes]]
+id = "transit1"
+text = "Transit 1 {{.name}}"
+transit = true
+next = "transit2"
+
+[[nodes]]
+id = "transit2"
+text = "Transit 2 {{.name}}"
+
+[[nodes]]
+id = "forceexist"
+text = "Редирект по кнопке"

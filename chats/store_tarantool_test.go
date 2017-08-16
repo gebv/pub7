@@ -8,11 +8,11 @@ import (
 	"gopkg.in/vmihailenco/msgpack.v2"
 )
 
-func TestStateMsgpackSerializer(t *testing.T) {
-	want := &State{
-		ChatID:   "chats:1",
-		ScriptID: "scripts:1",
-		LastQID:  "questions:1",
+func TestChatMsgpackSerializer(t *testing.T) {
+	want := &Chat{
+		ChatID:         "chats:1",
+		PreviousNodeID: "scripts:1",
+		NextNodeID:     "questions:1",
 		Props: map[string]interface{}{
 			"a":   "b",
 			"c":   "d",
@@ -22,12 +22,12 @@ func TestStateMsgpackSerializer(t *testing.T) {
 	}
 
 	dat, err := msgpack.Marshal(want)
-	assert.NoError(t, err, "marshal state")
+	assert.NoError(t, err, "marshal Chat")
 
-	got := &State{}
+	got := &Chat{}
 
 	err = msgpack.Unmarshal(dat, got)
-	assert.NoError(t, err, "unmarshal state")
+	assert.NoError(t, err, "unmarshal Chat")
 
 	assert.Equal(t, want, got)
 }
