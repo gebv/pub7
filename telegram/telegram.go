@@ -3,6 +3,7 @@ package telegram
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/gebv/ff_tgbot/chats"
 	"github.com/gebv/ff_tgbot/context"
@@ -20,10 +21,11 @@ func New(
 	log *zap.SugaredLogger,
 	chats chats.Store,
 	nodes nodes.Store,
+	ts time.Duration, // Задержка перед отпракой сообщения
 ) *Manager {
 	return &Manager{
 		log:   log,
-		api:   api,
+		api:   TelegramSenderWithTimeout(api, ts),
 		nodes: nodes,
 		chats: chats,
 	}
@@ -31,7 +33,7 @@ func New(
 
 type Manager struct {
 	log   *zap.SugaredLogger
-	api   *tgbotapi.BotAPI
+	api   TelegramAPI
 	nodes nodes.Store
 	chats chats.Store
 }
@@ -128,7 +130,12 @@ func (m *Manager) handler(
 		"node_param_name", node.ParamName,
 	)
 
-	ctx := context.Telegram(chat.Props, m.api)
+	ctx := context.Telegram(
+		chat.Props,
+		m.api,
+		req.Message.Chat.ID,
+		req.Message.Text,
+	)
 	L := lua.NewState()
 	defer L.Close()
 	context.RegisterTelegramContextType(L, ctx)

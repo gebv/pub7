@@ -1,19 +1,30 @@
 package context
 
 import (
+	"log"
+
+	"github.com/gebv/ff_tgbot/utils"
 	lua "github.com/yuin/gopher-lua"
 	"gopkg.in/telegram-bot-api.v4"
 )
 
 var _ Context = (*TelegramContext)(nil)
 
+type TelegramAPI interface {
+	Send(c tgbotapi.Chattable) (tgbotapi.Message, error)
+}
+
 func Telegram(
 	props map[string]interface{},
-	api *tgbotapi.BotAPI,
+	api TelegramAPI,
+	chatID int64,
+	currentMsg string,
 ) *TelegramContext {
 	return &TelegramContext{
-		props: props,
-		api:   api,
+		props:      props,
+		api:        api,
+		chatID:     chatID,
+		currentMsg: currentMsg,
 	}
 }
 
@@ -24,7 +35,9 @@ type TelegramContext struct {
 	redirTo string
 
 	chatID int64
-	api    *tgbotapi.BotAPI
+	api    TelegramAPI
+
+	currentMsg string
 }
 
 func RegisterTelegramContextType(
@@ -42,7 +55,20 @@ func RegisterTelegramContextType(
 	return
 }
 
-var telegramMethods = map[string]lua.LGFunction{}
+var telegramMethods = map[string]lua.LGFunction{
+	"send": func(L *lua.LState) int {
+		ctx := luaCheckCtx(L)
+		text := L.CheckString(2)
+		tctx := ctx.(*TelegramContext)
+
+		log.Println("send message ", text, tctx.chatID)
+		chatID := tctx.chatID
+		msg := tgbotapi.NewMessage(chatID, utils.ExecuteTemplate(text, ctx.Props()))
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		tctx.api.Send(msg)
+		return 0
+	},
+}
 
 func joinFuncs(m1, m2 map[string]lua.LGFunction) map[string]lua.LGFunction {
 	list := make(map[string]lua.LGFunction, len(m1)+len(m2))
@@ -87,4 +113,8 @@ func (c *TelegramContext) SetRedirect(v string) {
 
 func (c *TelegramContext) Error() error {
 	return c.err
+}
+
+func (c *TelegramContext) CurrentTextMessage() string {
+	return c.currentMsg
 }

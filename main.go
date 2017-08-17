@@ -164,6 +164,7 @@ func main() {
 					log.Named("tg"),
 					ChatsStore,
 					NodesStore,
+					time.Millisecond*500,
 				)
 
 				for update := range updates {

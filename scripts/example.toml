@@ -6,7 +6,11 @@ param = "name"
 
 [[nodes]]
 id = "your_name"
-text = "Ок, твое имя {{.name}}"
+before = '''
+ctx:set("magic_field", ctx:text().." - Супер")
+'''
+
+text = "Ок, твое имя {{.name}} - {{.magic_field}}"
 transit = true
 next = "buttons"
 

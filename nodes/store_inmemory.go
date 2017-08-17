@@ -1,6 +1,8 @@
 package nodes
 
 import (
+	"sync"
+
 	"github.com/BurntSushi/toml"
 	"github.com/gebv/as_gifts/errors"
 )
@@ -12,10 +14,15 @@ func NewInMemoryStoreNodes() *InMemoryStoreNodes {
 }
 
 type InMemoryStoreNodes struct {
+	sync.Mutex
+
 	List map[string]Node
 }
 
 func (s *InMemoryStoreNodes) Find(chatID string) (*Node, error) {
+	s.Lock()
+	defer s.Unlock()
+
 	obj, exists := s.List[chatID]
 	if !exists {
 		return nil, errors.ErrNotFound

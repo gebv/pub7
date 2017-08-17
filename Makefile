@@ -12,10 +12,10 @@ builddocker:
 admin-run:
 	go run main.go -file scripts/example.toml admin-run -path_views views/admin/*.tpl
 
-tgbot:
+run:
 	go run main.go -file scripts/example.toml tgbot-run
-.PHONY: tgbot
+.PHONY: run
 
-tgbot2:
+run2:
 	go run main.go -file scripts/example.toml run
-.PHONY: tgbot2
+.PHONY: run2

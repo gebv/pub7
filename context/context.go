@@ -20,6 +20,8 @@ type Context interface {
 	RedirectTo() string
 	SetRedirect(id string)
 
+	CurrentTextMessage() string
+
 	Error() error
 }
 
@@ -47,6 +49,12 @@ var basicMethods = map[string]lua.LGFunction{
 		k := L.CheckString(2)
 		v := ctx.Get(k)
 		lv := utils.ToLValueOrNil(v, L)
+		L.Push(lv)
+		return 1
+	},
+	"text": func(L *lua.LState) int {
+		ctx := luaCheckCtx(L)
+		lv := utils.ToLValueOrNil(ctx.CurrentTextMessage(), L)
 		L.Push(lv)
 		return 1
 	},
