@@ -1,8 +1,23 @@
 # pub7
 
+# Features
+
+* to collect user data
+* communicate according to the script
+
+# Status
+
+Not Ready for production
+
+# Examples
+
 ## example 1
 
+Diagram
+
 ![example1](https://s3.amazonaws.com/idheap/ss/pub7_example.png)
+
+Script
 
 ``` toml
 [[nodes]]
