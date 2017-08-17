@@ -86,7 +86,6 @@ func (m *Manager) handler(
 	chat *chats.Chat,
 	req tgbotapi.Update,
 ) (err error) {
-
 	////////////////////////////////////////////////////////////////////////////
 	// previous node
 	////////////////////////////////////////////////////////////////////////////
@@ -109,21 +108,33 @@ func (m *Manager) handler(
 		}
 	}
 
+	if previousNode != nil && previousNode.ID == chat.NextNodeID {
+		err = fmt.Errorf(
+			"looping '%s' (from '%s') -> '%s'",
+			previousNode.ID, chat.PreviousNodeID, chat.NextNodeID,
+		)
+		chat.NextNodeID = "start"
+		chat.PreviousNodeID = ""
+		return err
+	}
+
 	////////////////////////////////////////////////////////////////////////////
 	// next node
 	////////////////////////////////////////////////////////////////////////////
 
 	node, err := m.FindNode(chat.NextNodeID)
-	if err == errors.ErrNotFound {
+	if node == nil || err != nil {
 		node, err = m.FindNode("start")
-		if err != nil {
-			return fmt.Errorf("not found node %q or 'start'", chat.NextNodeID)
-		}
+	}
+	if err != nil {
+		return fmt.Errorf("not found node %q or 'start'", chat.NextNodeID)
 	}
 	chat.PreviousNodeID = node.ID
 	chat.NextNodeID = node.NextNodeID
 	m.log.Debugw(
 		"handler node",
+		"chat_next_node_id", chat.NextNodeID,
+		"chat_prev_node_id", chat.PreviousNodeID,
 		"node_id", node.ID,
 		"node_is_transit", node.IsTransit,
 		"node_next_id", node.NextNodeID,
@@ -238,7 +249,7 @@ func (m *Manager) FindChat(chatID int64) (*chats.Chat, error) {
 	return m.chats.Find(formatTelegramChatID(chatID))
 }
 
-func (m *Manager) FindNode(nodeID string) (*nodes.Node, error) {
+func (m *Manager) FindNode(nodeID string) (node *nodes.Node, err error) {
 	return m.nodes.Find(nodeID)
 }
 

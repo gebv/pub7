@@ -17,5 +17,5 @@ run:
 .PHONY: run
 
 run2:
-	go run main.go -file scripts/example.toml run
+	go run -race main.go -file scripts/example.toml run
 .PHONY: run2

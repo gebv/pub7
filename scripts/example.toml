@@ -1,41 +1,56 @@
 [[nodes]]
 id = "start"
-text = "Привет, я робот. Как тебя зовут?"
-next = "your_name"
-param = "name"
-
-[[nodes]]
-id = "your_name"
+text = "Hi, i am robot."
+next = "q_what_name"
 before = '''
-ctx:set("magic_field", ctx:text().." - Супер")
+if #ctx:get("name") > 0 then
+	ctx:redirect("q1")
+end
 '''
-
-text = "Ок, твое имя {{.name}} - {{.magic_field}}"
 transit = true
-next = "buttons"
-
-[[nodes]]
-id = "buttons"
-text = "{{.name}} выберите интересующий вас вариант"
-	[[nodes.opts]]
-	text = "Выход"
-	next = "forceexist"
-	[[nodes.opts]]
-	text = "Прочее 1"
-
-next = "transit1"
 
 
 [[nodes]]
-id = "transit1"
-text = "Transit 1 {{.name}}"
+id = "setname"
+next = "q_what_name"
 transit = true
-next = "transit2"
 
 [[nodes]]
-id = "transit2"
-text = "Transit 2 {{.name}}"
+id = "q_what_name"
+text = "What's your name?"
+next = "h_what_name"
 
 [[nodes]]
-id = "forceexist"
-text = "Редирект по кнопке"
+id = "h_what_name"
+handler = '''
+if ctx:text() == "" then
+	print("empty name")
+	ctx:redirect("q_what_name")
+end
+'''
+next = "q1"
+param = "name"
+transit = true
+
+
+[[nodes]]
+id = "q1"
+text = "{{.name}} how much 19+15 is?"
+next = "h_q1"
+
+[[nodes]]
+id = "h_q1"
+handler = '''
+print("h_q1", ctx:text())
+if ctx:text() == "34" then
+	ctx:redirect("finish")
+else 
+	ctx:send("No, try again")
+	ctx:redirect("q1")
+end
+'''
+transit = true
+
+[[nodes]]
+id = "finish"
+text = "Right! Again? /start"

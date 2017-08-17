@@ -172,7 +172,14 @@ func main() {
 						continue
 					}
 
-					go mng.Handler(update)
+					go func() {
+						if err := mng.Handler(update); err != nil {
+							log.Errorw(
+								"handler",
+								"err", err,
+							)
+						}
+					}()
 				}
 
 				return nil
