@@ -11,7 +11,7 @@ type TelegramAPI interface {
 }
 
 func TelegramSenderWithTimeout(
-	api *tgbotapi.BotAPI,
+	api TelegramAPI,
 	timeout time.Duration,
 ) *telegramSenderWithTimeout {
 	return &telegramSenderWithTimeout{
@@ -21,12 +21,12 @@ func TelegramSenderWithTimeout(
 }
 
 type telegramSenderWithTimeout struct {
-	*tgbotapi.BotAPI
+	TelegramAPI
 
 	Timeout time.Duration
 }
 
 func (s *telegramSenderWithTimeout) Send(c tgbotapi.Chattable) (tgbotapi.Message, error) {
 	time.Sleep(s.Timeout)
-	return s.BotAPI.Send(c)
+	return s.TelegramAPI.Send(c)
 }
