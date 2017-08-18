@@ -14,8 +14,8 @@ type Context interface {
 	Set(string, interface{})
 	Get(string) interface{}
 
-	IsAbort() bool
-	Abort()
+	AbortTo() string
+	Abort(string)
 
 	RedirectTo() string
 	SetRedirect(id string)
@@ -60,7 +60,7 @@ var basicMethods = map[string]lua.LGFunction{
 	},
 	"abort": func(L *lua.LState) int {
 		ctx := luaCheckCtx(L)
-		ctx.Abort()
+		ctx.Abort(L.CheckString(2))
 		return 0
 	},
 	"redirect": func(L *lua.LState) int {

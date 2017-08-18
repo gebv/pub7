@@ -46,10 +46,11 @@ if ctx:text() == "34" then
 	ctx:redirect("finish")
 else 
 	ctx:send("No, try again")
-	ctx:redirect("q1")
+	ctx:abort("h_q1")
 end
 '''
 transit = true
+next = "finish"
 
 [[nodes]]
 id = "finish"

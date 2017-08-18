@@ -76,16 +76,30 @@ func (m *Manager) Handler(req tgbotapi.Update) (err error) {
 		}
 	}()
 
+	var depth = 0
+
 	return m.handler(
 		chat,
 		req,
+		depth,
 	)
 }
 
 func (m *Manager) handler(
 	chat *chats.Chat,
 	req tgbotapi.Update,
+	depth int,
 ) (err error) {
+	depth++
+	if depth > 10 {
+		err = fmt.Errorf(
+			"looping - depth %d", depth,
+		)
+		chat.NextNodeID = "start"
+		chat.PreviousNodeID = ""
+		return err
+	}
+
 	////////////////////////////////////////////////////////////////////////////
 	// previous node
 	////////////////////////////////////////////////////////////////////////////
@@ -106,16 +120,6 @@ func (m *Manager) handler(
 				}
 			}
 		}
-	}
-
-	if previousNode != nil && previousNode.ID == chat.NextNodeID {
-		err = fmt.Errorf(
-			"looping '%s' (from '%s') -> '%s'",
-			previousNode.ID, chat.PreviousNodeID, chat.NextNodeID,
-		)
-		chat.NextNodeID = "start"
-		chat.PreviousNodeID = ""
-		return err
 	}
 
 	////////////////////////////////////////////////////////////////////////////
@@ -163,12 +167,13 @@ func (m *Manager) handler(
 		)
 		return err
 	}
-	if ctx.IsAbort() {
+	if len(ctx.AbortTo()) > 0 {
+		chat.NextNodeID = ctx.AbortTo()
 		return
 	}
 	if len(ctx.RedirectTo()) > 0 {
 		chat.NextNodeID = ctx.RedirectTo()
-		return m.handler(chat, req)
+		return m.handler(chat, req, depth)
 	}
 
 	////////////////////////////////////////////////////////////////////////////
@@ -208,12 +213,13 @@ func (m *Manager) handler(
 		m.api.Send(msg)
 	}
 
-	if ctx.IsAbort() {
+	if len(ctx.AbortTo()) > 0 {
+		chat.NextNodeID = ctx.AbortTo()
 		return
 	}
 	if len(ctx.RedirectTo()) > 0 {
 		chat.NextNodeID = ctx.RedirectTo()
-		return m.handler(chat, req)
+		return m.handler(chat, req, depth)
 	}
 
 	////////////////////////////////////////////////////////////////////////////
@@ -228,18 +234,19 @@ func (m *Manager) handler(
 		)
 		return err
 	}
-	if ctx.IsAbort() {
+	if len(ctx.AbortTo()) > 0 {
+		chat.NextNodeID = ctx.AbortTo()
 		return
 	}
 	if len(ctx.RedirectTo()) > 0 {
 		chat.NextNodeID = ctx.RedirectTo()
-		return m.handler(chat, req)
+		return m.handler(chat, req, depth)
 	}
 
 	// helpers
 
 	if node.IsTransit {
-		return m.handler(chat, req)
+		return m.handler(chat, req, depth)
 	}
 
 	return nil

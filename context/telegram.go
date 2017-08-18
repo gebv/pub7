@@ -30,7 +30,7 @@ func Telegram(
 
 type TelegramContext struct {
 	props   map[string]interface{}
-	isAbort bool
+	abortTo string
 	err     error
 	redirTo string
 
@@ -95,12 +95,12 @@ func (c *TelegramContext) Get(k string) interface{} {
 	return c.props[k]
 }
 
-func (c *TelegramContext) IsAbort() bool {
-	return c.isAbort
+func (c *TelegramContext) AbortTo() string {
+	return c.abortTo
 }
 
-func (c *TelegramContext) Abort() {
-	c.isAbort = true
+func (c *TelegramContext) Abort(v string) {
+	c.abortTo = v
 }
 
 func (c *TelegramContext) RedirectTo() string {
